@@ -25,6 +25,8 @@ Pick a demo user on the sign-in screen. The **Demo** role switcher in the top ba
 | `npm run check:contrast` | WCAG AA check of every token pair in `globals.css` |
 | `npm run fixtures` | Regenerates the `.xlsx` e2e fixtures (exceljs) |
 | `npm run verify` | typecheck → lint → contrast → unit tests → build |
+| `npm run contract:check` | **Live:** calls the running backend and parses every response with the zod schemas |
+| `npm run test:e2e:live` | **Live:** Playwright (1 worker, headless) against the running stack (`../start-all.ps1`): sign-in, translated row errors, four-eyes, Pay all + 409, -FAIL/-RECON, Trust Wallet with simulated verification, dashboard/audit |
 
 ## Environment
 
@@ -53,6 +55,14 @@ messages/         en.json / ar.json (parity enforced by a unit test)
 ```
 
 Mock and live share everything except the transport. Mock responses go through the same zod validation and error mapping as live ones, so switching `NEXT_PUBLIC_API_MODE` changes nothing else.
+
+## Contract additions used from the real backend
+
+- **Row errors** carry `issues: [{ code, params }]` next to `messages`. The errors table translates each code (`messages/*.json → issues`) and falls back to the server text for unknown codes. Inserted values are wrapped in LTR isolates so Arabic lines read correctly.
+- **`Batch.simulated`** (dry-run verification): shows a **Simulated** badge on the batch.
+- **`GET /config` → `maxRowsByChannel`**: the upload hint shows the selected channel's limit (MEXC 1000, Trust Wallet 200).
+
+The mock backend emits the same shapes.
 
 ## Mock mode
 

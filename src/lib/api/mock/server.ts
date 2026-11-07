@@ -151,6 +151,7 @@ export function createSeedState(now: number = Date.now()): MockState {
       paidCount: 0,
       failedCount: 0,
       reconciliationCount: 0,
+      simulated: false,
       createdBy: maker,
       createdAt: iso(createdAt),
     };
@@ -179,7 +180,7 @@ export function createSeedState(now: number = Date.now()): MockState {
     Object.assign(batch, { executedBy: executor, executedAt: iso(executedAt), completedAt: iso(completedAt) });
     const txHash = randomTxHash(rng);
     if (spec.channel === "trust_wallet") {
-      Object.assign(batch, { txHash, explorerUrl: txUrl(spec.network, txHash) });
+      Object.assign(batch, { txHash, explorerUrl: txUrl(spec.network, txHash), simulated: true });
       pushAudit(state, id, "batch.transaction_submitted", executor, executedAt, { txHash, from: MOCK_TREASURY });
     } else {
       pushAudit(state, id, "batch.execution_started", executor, executedAt, { provider: "MEXC" });
@@ -459,6 +460,7 @@ export class MockServer {
       paidCount: 0,
       failedCount: 0,
       reconciliationCount: 0,
+      simulated: false,
       createdBy: user,
       createdAt: iso(now),
     };
@@ -552,6 +554,7 @@ export class MockServer {
       executedAt: iso(now),
       txHash,
       explorerUrl: txUrl(b.network, txHash),
+      simulated: true, // the mock's chain is simulated, like the backend's dry-run verifier
       finalizeAt: now + this.timing.chainConfirmMs,
     });
     pushAudit(this.state, id, "batch.transaction_submitted", user, now, { txHash, from: MOCK_TREASURY });

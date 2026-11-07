@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, FileQuestion, Radio, XCircle } from "lucide-react";
+import { ArrowLeft, FileQuestion, FlaskConical, Radio, XCircle } from "lucide-react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useFormatter, useTranslations } from "next-intl";
@@ -93,6 +93,16 @@ function Header({ batch, onStartTrustWallet }: { batch: Batch; onStartTrustWalle
               {t("title", { id: batch.id })}
             </h1>
             <StatusBadge status={batch.status} size="lg" />
+            {batch.simulated && (
+              <span
+                title={t("simulatedHint")}
+                data-testid="simulated-badge"
+                className="inline-flex items-center gap-1.5 rounded-full border border-testnet-border bg-testnet-bg px-3 py-1 text-xs font-semibold text-testnet-fg"
+              >
+                <FlaskConical className="size-3.5" aria-hidden />
+                {t("simulated")}
+              </span>
+            )}
             {batch.status === "processing" && (
               <span className="inline-flex items-center gap-1.5 text-xs font-medium text-status-processing-fg">
                 <Radio className="size-3.5 animate-pulse" aria-hidden />

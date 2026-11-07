@@ -16,7 +16,7 @@ export function useActionLabel() {
 
 const AMOUNT_KEYS = new Set(["totalAmount", "paidAmount", "amount"]);
 const HASH_KEYS = new Set(["txHash", "from", "address", "treasury"]);
-const HIDDEN_KEYS = new Set(["itemId"]);
+const HIDDEN_KEYS = new Set(["itemId", "fileSha256", "seeded"]);
 
 function renderValue(key: string, value: unknown): React.ReactNode {
   if (value === null || value === undefined || value === "") return null;

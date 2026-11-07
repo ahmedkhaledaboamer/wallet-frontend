@@ -264,7 +264,9 @@
       "title": "Activity",
       "empty": "No activity yet.",
       "system": "System"
-    }
+    },
+    "simulated": "Simulated",
+    "simulatedHint": "Settled by the dry-run simulator, not a real blockchain transaction."
   },
   "audit": {
     "title": "Audit log",
@@ -290,7 +292,10 @@
       "batch_completed_with_issues": "Completed with issues",
       "batch_failed": "Batch failed",
       "item_failed": "Withdrawal failed",
-      "item_requires_reconciliation": "Withdrawal needs reconciliation"
+      "item_requires_reconciliation": "Withdrawal needs reconciliation",
+      "item_succeeded": "Withdrawal paid",
+      "item_retry_scheduled": "Retry scheduled",
+      "batch_transaction_verified": "Transaction verified"
     },
     "context": {
       "fileName": "File",
@@ -307,7 +312,19 @@
       "reconciliationCount": "Reconciliation",
       "paidAmount": "Paid amount",
       "reference": "Reference",
-      "itemId": "Item"
+      "itemId": "Item",
+      "network": "Network",
+      "asset": "Asset",
+      "chainId": "Chain",
+      "treasury": "Treasury",
+      "result": "Result",
+      "blockNumber": "Block",
+      "simulated": "Simulated",
+      "providerReference": "Provider ref",
+      "gateway": "Gateway",
+      "attempt": "Attempt",
+      "attempts": "Attempts",
+      "providerCode": "Provider code"
     }
   },
   "wallet": {
@@ -375,5 +392,27 @@
       "unknown": "Something went wrong: {message}"
     },
     "retryReport": "Retry reporting"
+  },
+  "issues": {
+    "address_invalid": "\"{address}\" is not a valid {network} address.",
+    "amount_required": "Amount is required.",
+    "amount_not_number": "Amount \"{value}\" isn't a plain decimal number. Store amounts as text, e.g. 125.50.",
+    "amount_not_positive": "Amount \"{value}\" must be greater than zero.",
+    "amount_zero": "Amount must be greater than zero.",
+    "amount_too_precise": "Amount \"{value}\" has more than {max} decimal places.",
+    "amount_below_minimum": "Amount {value} is below the {channel} minimum of {minimum}.",
+    "reference_duplicate": "Duplicate reference \"{reference}\" (first used on row {firstRow}).",
+    "reference_required": "Reference is required.",
+    "asset_unsupported": "Unsupported asset \"{value}\". Only USDT is supported.",
+    "network_unsupported": "Unsupported network \"{value}\". Use TRC20, BEP20 or ERC20.",
+    "network_unsupported_for_channel": "{network} can't be paid via {channel}. Trust Wallet supports BEP20/ERC20 only.",
+    "file_missing_columns": "Missing required column(s): {columns}.",
+    "file_empty": "The file contains no withdrawal rows.",
+    "file_duplicate": "This exact file was already uploaded (batch {batchId}).",
+    "file_mixed_network": "A batch must use one network; this file mixes {networks}.",
+    "file_too_many_rows": "The file has {count} rows; the maximum for {channel} is {max}.",
+    "file_too_large": "The file is too large (maximum {max} bytes).",
+    "file_unreadable": "The file is not a readable .xlsx workbook.",
+    "batch_total_exceeds_limit": "Batch total {total} exceeds the limit of {limit}."
   }
 }

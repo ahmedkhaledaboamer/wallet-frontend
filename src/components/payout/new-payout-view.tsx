@@ -180,7 +180,7 @@ export function NewPayoutView() {
             setFile(f);
             revalidate(f, channel);
           }}
-          maxRows={config.data?.maxRows}
+          maxRows={(channel && config.data?.maxRowsByChannel?.[channel]) || config.data?.maxRows}
           maxTotal={config.data?.maxBatchTotal}
           disabled={create.isPending}
         />

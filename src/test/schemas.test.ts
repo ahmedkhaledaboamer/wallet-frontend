@@ -115,7 +115,13 @@ describe("api client error mapping", () => {
     const err = await client({ status: 422, body: { message: "bad", code: "VALIDATION_FAILED", errors: [{ row: 2, messages: ["x"] }] } })
       .getBatch("1")
       .catch((e) => e);
-    expect(err.rowErrors).toEqual([{ row: 2, messages: ["x"] }]);
+    expect(err.rowErrors).toEqual([{ row: 2, messages: ["x"], issues: [] }]);
+  });
+
+  it("keeps backend issue codes for translation", async () => {
+    const body = { message: "bad", code: "VALIDATION_FAILED", errors: [{ row: 0, messages: ["dup"], issues: [{ code: "file.duplicate", params: { batchId: "b1" } }] }] };
+    const err = await client({ status: 422, body }).getBatch("1").catch((e) => e);
+    expect(err.rowErrors[0].issues).toEqual([{ code: "file.duplicate", params: { batchId: "b1" } }]);
   });
 
   it("flags responses that break the contract", async () => {

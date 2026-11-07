@@ -264,7 +264,9 @@
       "title": "النشاط",
       "empty": "لا يوجد نشاط بعد.",
       "system": "النظام"
-    }
+    },
+    "simulated": "محاكاة",
+    "simulatedHint": "تمت التسوية عبر محاكي التشغيل التجريبي، وليست معاملة حقيقية على البلوكتشين."
   },
   "audit": {
     "title": "سجل التدقيق",
@@ -290,7 +292,10 @@
       "batch_completed_with_issues": "اكتملت مع مشكلات",
       "batch_failed": "فشل الدفعة",
       "item_failed": "فشل عملية سحب",
-      "item_requires_reconciliation": "عملية سحب تحتاج إلى تسوية"
+      "item_requires_reconciliation": "عملية سحب تحتاج إلى تسوية",
+      "item_succeeded": "تم صرف عملية السحب",
+      "item_retry_scheduled": "جدولة إعادة المحاولة",
+      "batch_transaction_verified": "التحقق من المعاملة"
     },
     "context": {
       "fileName": "الملف",
@@ -307,7 +312,19 @@
       "reconciliationCount": "التسوية",
       "paidAmount": "المبلغ المدفوع",
       "reference": "المرجع",
-      "itemId": "العنصر"
+      "itemId": "العنصر",
+      "network": "الشبكة",
+      "asset": "الأصل",
+      "chainId": "السلسلة",
+      "treasury": "الخزينة",
+      "result": "النتيجة",
+      "blockNumber": "الكتلة",
+      "simulated": "محاكاة",
+      "providerReference": "مرجع المزوّد",
+      "gateway": "البوابة",
+      "attempt": "المحاولة",
+      "attempts": "المحاولات",
+      "providerCode": "رمز المزوّد"
     }
   },
   "wallet": {
@@ -375,5 +392,27 @@
       "unknown": "حدث خطأ: {message}"
     },
     "retryReport": "إعادة محاولة الإبلاغ"
+  },
+  "issues": {
+    "address_invalid": "\"{address}\" ليس عنوان {network} صالحًا.",
+    "amount_required": "المبلغ مطلوب.",
+    "amount_not_number": "المبلغ \"{value}\" ليس رقمًا عشريًا صحيحًا. اكتب المبالغ كنص، مثل 125.50.",
+    "amount_not_positive": "يجب أن يكون المبلغ \"{value}\" أكبر من صفر.",
+    "amount_zero": "يجب أن يكون المبلغ أكبر من صفر.",
+    "amount_too_precise": "المبلغ \"{value}\" يحتوي على أكثر من {max} منازل عشرية.",
+    "amount_below_minimum": "المبلغ {value} أقل من الحد الأدنى لـ {channel} وهو {minimum}.",
+    "reference_duplicate": "المرجع \"{reference}\" مكرر (استُخدم أولًا في الصف {firstRow}).",
+    "reference_required": "المرجع مطلوب.",
+    "asset_unsupported": "الأصل \"{value}\" غير مدعوم. المدعوم: USDT فقط.",
+    "network_unsupported": "الشبكة \"{value}\" غير مدعومة. استخدم TRC20 أو BEP20 أو ERC20.",
+    "network_unsupported_for_channel": "لا يمكن الصرف على {network} عبر {channel}. تدعم Trust Wallet شبكتي BEP20/ERC20 فقط.",
+    "file_missing_columns": "أعمدة مطلوبة مفقودة: {columns}.",
+    "file_empty": "لا يحتوي الملف على أي صفوف سحب.",
+    "file_duplicate": "تم رفع هذا الملف نفسه مسبقًا (الدفعة {batchId}).",
+    "file_mixed_network": "يجب أن تستخدم الدفعة شبكة واحدة؛ هذا الملف يخلط بين {networks}.",
+    "file_too_many_rows": "يحتوي الملف على {count} صف، والحد الأقصى لـ {channel} هو {max}.",
+    "file_too_large": "حجم الملف كبير جدًا (الحد الأقصى {max} بايت).",
+    "file_unreadable": "الملف ليس مصنف ‎.xlsx‎ قابلًا للقراءة.",
+    "batch_total_exceeds_limit": "إجمالي الدفعة {total} يتجاوز الحد المسموح {limit}."
   }
 }

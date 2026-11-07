@@ -83,6 +83,8 @@ export const batchSchema = z.object({
   approvedAt: opt(isoDateSchema),
   executedAt: opt(isoDateSchema),
   completedAt: opt(isoDateSchema),
+  /** true when a dry-run simulator (not a real chain) settled the batch. */
+  simulated: z.boolean().optional().default(false),
 });
 export type Batch = z.output<typeof batchSchema>;
 
@@ -139,6 +141,8 @@ export const configSchema = z.object({
   dryRun: z.boolean(),
   networks: z.array(networkConfigSchema),
   maxRows: z.number().int().positive(),
+  /** Per-channel row limits (MEXC 1000, Trust Wallet 200). Optional for older backends. */
+  maxRowsByChannel: z.object({ mexc: z.number().int().positive(), trust_wallet: z.number().int().positive() }).optional(),
   maxBatchTotal: amountSchema,
 });
 export type AppConfig = z.output<typeof configSchema>;
@@ -162,9 +166,18 @@ export const dashboardStatsSchema = z.object({
 });
 export type DashboardStats = z.output<typeof dashboardStatsSchema>;
 
+/** Stable, translatable validation issue (e.g. { code: "reference.duplicate", params: { reference, firstRow } }). */
+export const issueSchema = z.object({
+  code: z.string(),
+  params: z.record(z.string(), z.union([z.string(), z.number(), z.array(z.string())])).optional(),
+});
+export type Issue = z.output<typeof issueSchema>;
+
 export const rowErrorSchema = z.object({
   row: z.number().int().nonnegative(),
+  /** English text; messages[i] describes issues[i]. */
   messages: z.array(z.string()),
+  issues: z.array(issueSchema).optional().default([]),
 });
 export type RowError = z.output<typeof rowErrorSchema>;
 

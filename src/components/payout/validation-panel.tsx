@@ -5,7 +5,38 @@ import { useTranslations } from "next-intl";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Money } from "@/components/common/money";
 import { formatCount } from "@/lib/amount";
-import type { RowError, ValidationResult } from "@/lib/api/schemas";
+import type { Issue, RowError, ValidationResult } from "@/lib/api/schemas";
+import { ltr } from "@/lib/bidi";
+
+/**
+ * Translates a validation issue by its stable code (e.g. "reference.duplicate" → messages.issues.reference_duplicate).
+ * Returns undefined for codes this UI doesn't know, so the caller falls back to the server's English message.
+ */
+export function useIssueText() {
+  const t = useTranslations("issues");
+  const tc = useTranslations("channel");
+  return (issue: Issue): string | undefined => {
+    const p = issue.params ?? {};
+    let key = issue.code.replace(/\./g, "_");
+    if (key === "amount_not_number" && (p.value === "" || p.value === undefined)) key = "amount_required";
+    if (!t.has(key as never)) return undefined;
+    const values: Record<string, string> = {};
+    for (const [k, v] of Object.entries(p)) {
+      // User data (addresses, references, amounts) is isolated LTR so it can't flip an Arabic sentence.
+      values[k] = k === "channel" && (v === "mexc" || v === "trust_wallet") ? tc(v) : ltr(Array.isArray(v) ? v.join(", ") : String(v));
+    }
+    return t(key as never, values as never);
+  };
+}
+
+/** One line per issue: translated when the code is known, otherwise the server's (English) text. */
+function rowMessages(e: RowError, issueText: (i: Issue) => string | undefined): { text: string; translated: boolean }[] {
+  if (!e.issues.length) return e.messages.map((text) => ({ text, translated: false }));
+  return e.issues.map((issue, i) => {
+    const text = issueText(issue);
+    return text ? { text, translated: true } : { text: e.messages[i] ?? issue.code, translated: false };
+  });
+}
 
 export function ValidatingState({ fileName }: { fileName: string }) {
   const t = useTranslations("newPayout");
@@ -49,6 +80,7 @@ export function ValidSummary({ result }: { result: ValidationResult }) {
 
 export function ErrorsTable({ errors }: { errors: RowError[] }) {
   const t = useTranslations("newPayout");
+  const issueText = useIssueText();
   const problems = errors.reduce((n, e) => n + Math.max(1, e.messages.length), 0);
   return (
     <div className="overflow-hidden rounded-2xl border border-status-failed-dot/30 bg-card shadow-card" data-testid="validation-errors">
@@ -77,10 +109,10 @@ export function ErrorsTable({ errors }: { errors: RowError[] }) {
                 </TableCell>
                 <TableCell className="pe-5 whitespace-normal">
                   <ul className="space-y-1">
-                    {e.messages.map((m, i) => (
-                      <li key={i} className="flex gap-2 text-sm" dir="auto">
+                    {rowMessages(e, issueText).map((m, i) => (
+                      <li key={i} className="flex gap-2 text-sm" dir={m.translated ? undefined : "auto"} data-testid="error-message">
                         <span aria-hidden className="mt-2 size-1 shrink-0 rounded-full bg-status-failed-dot" />
-                        {m}
+                        {m.text}
                       </li>
                     ))}
                   </ul>
