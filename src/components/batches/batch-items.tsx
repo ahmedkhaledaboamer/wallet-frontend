@@ -79,10 +79,11 @@ export function BatchItems({ batch }: { batch: Batch }) {
 
   return (
     <Card className="gap-0 py-0" data-testid="batch-items">
-      <CardHeader className="flex flex-col gap-3 border-b border-border py-4 sm:flex-row sm:items-center sm:justify-between sm:py-5">
+      {/* One layout at every width: title, full-width search, then status filter + Download Excel. */}
+      <CardHeader className="flex flex-col gap-3 border-b border-border py-4 sm:py-5">
         <CardTitle className="text-lg">{t("batch.items.title")}</CardTitle>
-        <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row">
-          <div className="relative sm:w-72">
+        <div className="flex w-full flex-col gap-2 sm:flex-row sm:flex-wrap">
+          <div className="relative sm:basis-full">
             <Search className="pointer-events-none absolute start-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
             <Input
               type="search"
@@ -104,7 +105,7 @@ export function BatchItems({ batch }: { batch: Batch }) {
               setPage(1);
             }}
           >
-            <SelectTrigger className="h-9 w-full sm:w-52" aria-label={t("batches.filterStatus")} data-testid="items-status">
+            <SelectTrigger className="h-9 w-full sm:min-w-44 sm:flex-1" aria-label={t("batches.filterStatus")} data-testid="items-status">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
@@ -118,7 +119,7 @@ export function BatchItems({ batch }: { batch: Batch }) {
           </Select>
           <Button
             variant="outline"
-            className="h-9"
+            className="h-9 shrink-0"
             onClick={exportExcel}
             disabled={exporting || !query.data?.meta.total}
             title={t("batch.items.exportHint")}
