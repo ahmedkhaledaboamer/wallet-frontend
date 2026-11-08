@@ -1,8 +1,10 @@
 "use client";
 
-import { Search, SearchX } from "lucide-react";
+import { FileSpreadsheet, Loader2, Search, SearchX } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { useDeferredValue, useEffect, useState } from "react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -12,7 +14,8 @@ import { CopyButton, ExplorerLink, HashValue } from "@/components/common/address
 import { Money } from "@/components/common/money";
 import { Pagination } from "@/components/common/pagination";
 import { StatusBadge } from "@/components/common/status-badge";
-import { EmptyState, ErrorState } from "@/components/common/states";
+import { EmptyState, ErrorState, useErrorMessage } from "@/components/common/states";
+import { api } from "@/lib/api";
 import { useBatchItems, useConfig } from "@/lib/api/queries";
 import { ITEM_STATUSES, type Batch, type BatchItem, type ItemStatus } from "@/lib/api/schemas";
 import { addressUrl } from "@/lib/explorer";
@@ -53,6 +56,26 @@ export function BatchItems({ batch }: { batch: Batch }) {
   const debounced = useDeferredValue(useDebounced(search.trim(), 300));
   const query = useBatchItems(batch.id, { search: debounced || undefined, status, page, pageSize: PAGE_SIZE }, batch.status === "processing");
   const filtered = Boolean(debounced || status);
+  const errorMessage = useErrorMessage();
+  const [exporting, setExporting] = useState(false);
+
+  /** Downloads exactly what the table shows: the current status filter and search, all pages. */
+  const exportExcel = async () => {
+    setExporting(true);
+    try {
+      const { blob, filename } = await api().downloadBatchItems(batch.id, { status, search: debounced || undefined });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = filename;
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+    } catch (e) {
+      toast.error(errorMessage(e));
+    } finally {
+      setExporting(false);
+    }
+  };
 
   return (
     <Card className="gap-0 py-0" data-testid="batch-items">
@@ -93,6 +116,17 @@ export function BatchItems({ batch }: { batch: Batch }) {
               ))}
             </SelectContent>
           </Select>
+          <Button
+            variant="outline"
+            className="h-9"
+            onClick={exportExcel}
+            disabled={exporting || !query.data?.meta.total}
+            title={t("batch.items.exportHint")}
+            data-testid="items-export"
+          >
+            {exporting ? <Loader2 className="animate-spin" aria-hidden /> : <FileSpreadsheet aria-hidden />}
+            {exporting ? t("batch.items.exporting") : t("batch.items.export")}
+          </Button>
         </div>
       </CardHeader>
 

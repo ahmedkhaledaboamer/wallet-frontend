@@ -112,6 +112,20 @@ export function createApiClient({ transport, getToken, onUnauthorized }: ApiClie
       return { blob: res.body, filename: res.filename ?? "withdrawals-template.xlsx" };
     },
 
+    /** Excel export of a batch's withdrawals (same status/search filters as the table). */
+    async downloadBatchItems(id: string, p: Pick<BatchItemsParams, "status" | "search"> = {}): Promise<{ blob: Blob; filename: string }> {
+      const res = await send({
+        method: "GET",
+        path: `/batches/${encodeURIComponent(id)}/items.xlsx`,
+        query: { status: p.status, search: p.search },
+        responseType: "blob",
+      });
+      if (!(res.body instanceof Blob)) {
+        throw new ApiError({ status: res.status, kind: "invalidResponse", message: "Export is not a file" });
+      }
+      return { blob: res.body, filename: res.filename ?? `batch-${id.slice(0, 8)}-withdrawals.xlsx` };
+    },
+
     validateBatch: (file: File, channel: Channel, signal?: AbortSignal) =>
       json(validationResultSchema, { method: "POST", path: "/batches/validate", body: upload(file, channel), signal }),
     createBatch: (file: File, channel: Channel) =>

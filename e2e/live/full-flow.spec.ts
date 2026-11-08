@@ -205,3 +205,42 @@ test("g. dashboard KPIs and audit log reflect the runs", async ({ page, request 
   await expect(table).toContainText("Transaction verified");
   await expect(table).toContainText("Simulated");
 });
+
+test("h. Download Excel exports the table's withdrawals (all rows, then filtered)", async ({ page, request }) => {
+  const list = await apiGet(request, "/batches?status=completed_with_issues&pageSize=100");
+  const batch = list.data.find((b: { failedCount: number }) => b.failedCount > 0); // needs rows for the filtered export
+  expect(batch, "a completed_with_issues batch with failed items").toBeTruthy();
+  await login(page, "checker", "ar");
+  await page.goto(`/batches/${batch.id}`);
+  const button = page.getByTestId("items-export");
+  await expect(button).toContainText("تنزيل Excel");
+
+  const read = async () => {
+    const download = await Promise.all([page.waitForEvent("download"), button.click()]).then(([d]) => d);
+    const ExcelJS = (await import("exceljs")).default;
+    const wb = new ExcelJS.Workbook();
+    await wb.xlsx.readFile((await download.path())!);
+    const ws = wb.getWorksheet("Withdrawals")!;
+    const header = (ws.getRow(1).values as unknown[]).slice(1).map(String);
+    const statusCol = header.indexOf("status") + 1;
+    const statuses: string[] = [];
+    ws.eachRow((row, n) => n > 1 && statuses.push(String(row.getCell(statusCol).value)));
+    return { name: download.suggestedFilename(), header, statuses };
+  };
+
+  const all = await read();
+  expect(all.name).toMatch(/^batch-.*-withdrawals\.xlsx$/);
+  expect(all.header).toEqual(expect.arrayContaining(["reference", "address", "amount", "status", "provider_reference", "failure_reason"]));
+  expect(all.statuses).toHaveLength(batch.itemCount);
+
+  await page.getByTestId("items-status").click();
+  await page.getByRole("option", { name: "فشلت" }).click();
+  const failed = await read();
+  expect(failed.name).toContain("-failed.xlsx");
+  expect(failed.statuses).toHaveLength(batch.failedCount);
+  expect(failed.statuses.every((s) => s === "failed")).toBe(true);
+
+  // Nothing to export → the button is disabled rather than producing an empty file.
+  await page.getByTestId("items-search").fill("no-such-reference-xyz");
+  await expect(button).toBeDisabled();
+});

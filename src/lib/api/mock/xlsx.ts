@@ -93,3 +93,28 @@ export async function buildWorkbook(rows: TemplateRow[] = []): Promise<ArrayBuff
 }
 
 export const XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+
+/** Mock of GET /batches/:id/items.xlsx (same columns as the backend export; amounts as exact text). */
+export async function buildItemsExport(
+  batch: { id: string; asset: string; network: string; status: string; totalAmount: string; itemCount: number },
+  items: { reference: string; address: string; amount: string; status: string; providerReference?: string; failureReason?: string; processedAt?: string }[],
+): Promise<ArrayBuffer> {
+  const wb = await newWorkbook();
+  const ws = wb.addWorksheet("Withdrawals", { views: [{ state: "frozen", ySplit: 1 }] });
+  ws.columns = [
+    { header: "reference", key: "reference", width: 24 },
+    { header: "address", key: "address", width: 46 },
+    { header: "amount", key: "amount", width: 16, style: { numFmt: "@" } },
+    { header: "asset", key: "asset", width: 8 },
+    { header: "network", key: "network", width: 10 },
+    { header: "status", key: "status", width: 24 },
+    { header: "provider_reference", key: "providerReference", width: 34 },
+    { header: "failure_reason", key: "failureReason", width: 50 },
+    { header: "processed_at", key: "processedAt", width: 24 },
+  ];
+  for (const it of items) ws.addRow({ ...it, asset: batch.asset, network: batch.network });
+  const summary = wb.addWorksheet("Batch");
+  [["batch_id", batch.id], ["status", batch.status], ["total_amount", batch.totalAmount], ["item_count", batch.itemCount], ["exported_rows", items.length]].forEach((r) => summary.addRow(r));
+  const buf = await wb.xlsx.writeBuffer();
+  return new Uint8Array(buf as ArrayBuffer).slice().buffer;
+}

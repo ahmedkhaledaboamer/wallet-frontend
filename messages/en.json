@@ -258,7 +258,10 @@
       "colReason": "Failure reason",
       "memo": "Memo: {memo}",
       "emptyTitle": "No withdrawals match",
-      "emptyBody": "Try a different search or status."
+      "emptyBody": "Try a different search or status.",
+      "export": "Download Excel",
+      "exporting": "Preparing Excel…",
+      "exportHint": "Downloads the withdrawals shown (current status filter and search)."
     },
     "audit": {
       "title": "Activity",

@@ -42,7 +42,7 @@ import {
   type Rng,
 } from "./seed";
 import { validateSheet, type ValidRow } from "./validate";
-import { XLSX_MIME, buildWorkbook, parseWorkbook } from "./xlsx";
+import { XLSX_MIME, buildItemsExport, buildWorkbook, parseWorkbook } from "./xlsx";
 
 type Outcome = "succeeded" | "failed" | "requires_reconciliation";
 
@@ -351,6 +351,19 @@ export class MockServer {
       if (seg.length === 2 && method === "GET") {
         this.auth(req);
         return ok(publicBatch(this.batch(id)));
+      }
+      if (action === "items.xlsx" && method === "GET") {
+        this.auth(req);
+        const batch = this.batch(id);
+        const rows: BatchItem[] = [];
+        for (let p = 1; ; p++) {
+          const page = this.listItems(id, { ...q, page: p, pageSize: 200 }); // export ALL matching rows, not one page
+          rows.push(...page.data);
+          if (rows.length >= page.meta.total || page.data.length === 0) break;
+        }
+        const buf = await buildItemsExport(publicBatch(batch), rows);
+        const suffix = q.status ? `-${q.status}` : "";
+        return { status: 200, body: new Blob([buf], { type: XLSX_MIME }), filename: `batch-${id}-withdrawals${suffix}.xlsx` };
       }
       if (action === "items" && method === "GET") {
         this.auth(req);
